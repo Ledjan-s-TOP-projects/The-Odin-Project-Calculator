@@ -71,6 +71,13 @@ body {
   font-size: 1.2rem;
 }
 
+#divide,
+#multiply,
+#subtract,
+#add {
+  background: linear-gradient(to right, #33c0df79, #04a3c779);
+}
+
 .number:hover,
 .operator:hover,
 .function:hover {
@@ -90,4 +97,8 @@ body {
 .row {
   display: flex;
   gap: 18px;
+}
+
+#equal {
+  flex-grow: 1;
 }

@@ -22,17 +22,19 @@ numbers.forEach((button) => {
 });
 
 functions.forEach((button) => {
-  switch (button.id) {
-    case "clear":
-      button.addEventListener("click", clear);
-      break;
-    case "delete":
-      button.addEventListener("click", deleteBack);
-      break;
-    case "equal":
-      button.addEventListener("click", operate);
-      break;
-  }
+  button.addEventListener("click", () => {
+    switch (button.id) {
+      case "clear":
+        clear();
+        break;
+      case "delete":
+        deleteBack();
+        break;
+      case "equal":
+        operate(operator, ...numbers);
+        break;
+    }
+  });
 });
 
 operators.forEach((button) => {
@@ -62,8 +64,8 @@ operators.forEach((button) => {
 
 //-------Functions-----------
 function clear() {
-  display1 = "";
-  display2 = "";
+  display1 = "0";
+  display2 = "0";
   num1 = 0;
   num2 = 0;
   operator;

@@ -1,9 +1,10 @@
 //----Variables for updating the display-----
-let display1 = 0;
+let display1 = "0";
+let display2 = "0";
 let num1 = 0;
 let num2 = 0;
-let operator;
-let display2 = 0;
+let operator = "";
+let total = "";
 
 //----Buttons----
 const functions = document.querySelectorAll(".function");
@@ -13,7 +14,9 @@ const operators = document.querySelectorAll(".operator");
 //----Event Listeners for buttons----
 numbers.forEach((button) => {
   button.addEventListener("click", () => {
-    display1 = display1.toString() + button.textContent;
+    display1 === "0"
+      ? (display1 = button.textContent)
+      : (display1 = display1.toString() + button.textContent);
     updateDisplay();
   });
 });
@@ -33,48 +36,38 @@ functions.forEach((button) => {
 });
 
 operators.forEach((button) => {
-  switch (button.id) {
-    case "divide":
-      button.addEventListener("click", () => {
-        operator = "/";
-        display1 = display1 + button.textContent;
-        updateDisplay();
-      });
-      break;
+  button.addEventListener("click", () => {
+    const operatorSymbols = {
+      divide: "/",
+      multiply: "x",
+      add: "+",
+      subtract: "-",
+    };
+    const selectedOperator = operatorSymbols[button.id];
+    const lastChar = display1.slice(-1);
 
-    case "multiply":
-      button.addEventListener("click", () => {
-        operator = "*";
-        display1 = display1 + button.textContent;
-        updateDisplay();
-      });
-      break;
+    if (display1 === "0") return;
 
-    case "add":
-      button.addEventListener("click", () => {
-        operator = "+";
-        display1 = display1 + button.textContent;
-        updateDisplay();
-      });
-      break;
+    if (["+", "-", "x", "/"].includes(lastChar)) {
+      display1 = display1.slice(0, -1) + button.textContent;
+    } else {
+      display1 = display1 + button.textContent;
+    }
 
-    case "subtract":
-      button.addEventListener("click", () => {
-        operator = "-";
-        display1 = display1 + button.textContent;
-        updateDisplay();
-      });
-      break;
-
-    //------Implement the percentage case
-  }
+    num1 = Number(display1.slice(0, -1));
+    operator = selectedOperator;
+    updateDisplay();
+  });
 });
 
 //-------Functions-----------
 function clear() {
-  display1 = 0;
-  display2 = 0;
-  operator = "";
+  display1 = "";
+  display2 = "";
+  num1 = 0;
+  num2 = 0;
+  operator;
+  total = "";
   updateDisplay();
 }
 
@@ -99,7 +92,7 @@ function operate(operator, ...numbers) {
       return add(...numbers);
     case "-":
       return subtract(...numbers);
-    case "*":
+    case "x":
       return multiply(...numbers);
     case "/":
       return divide(...numbers);

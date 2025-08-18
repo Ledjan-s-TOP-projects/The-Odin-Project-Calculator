@@ -170,6 +170,7 @@ function equal() {
       num2 = Number(display1.slice(indexOfsymbol + 1));
       total = operate(operator, num1, num2);
       display2 = total.toString();
+      //fix how you handle total on display2 for the other processes
       updateDisplay();
       return;
     }

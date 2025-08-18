@@ -1,0 +1,176 @@
+//----Variables for updating the display-----
+let display1 = "0";
+let display2 = "0";
+let num1 = 0;
+let num2 = 0;
+let operator = "";
+let total = "";
+
+//----Buttons' queries----
+const functions = document.querySelectorAll(".function");
+const numbers = document.querySelectorAll(".number");
+const operators = document.querySelectorAll(".operator");
+
+//----Event Listeners for buttons----
+numbers.forEach((button) => {
+  button.addEventListener("click", () => {
+    display1 === "0"
+      ? (display1 = button.textContent)
+      : (display1 = display1.toString() + button.textContent);
+    updateDisplay();
+  });
+});
+
+functions.forEach((button) => {
+  button.addEventListener("click", () => {
+    switch (button.id) {
+      case "clear":
+        clear();
+        break;
+      case "delete":
+        deleteBack();
+        break;
+      case "equal":
+        if (display1 === "0" || display1 === "") return;
+        if (operator === "") return;
+        const symbols = ["/", "x", "-", "+"];
+        for (let i = 0; i < symbols.length; i++) {
+          const indexOfsymbol = display1.indexOf(symbols[i]);
+          if (indexOfsymbol !== -1) {
+            num2 = Number(display1.slice(indexOfsymbol + 1));
+            total = operate(operator, num1, num2);
+            display2 = total.toString();
+            updateDisplay();
+            return;
+          }
+        }
+        break;
+    }
+  });
+});
+
+operators.forEach((button) => {
+  button.addEventListener("click", () => {
+    const operatorSymbols = {
+      divide: "/",
+      multiply: "x",
+      add: "+",
+      subtract: "-",
+    };
+    const selectedOperator = operatorSymbols[button.id];
+    const lastChar = display1.slice(-1);
+
+    if (display1 === "0") return;
+    //When a previous result is shown on Display2, the selected operator starts a new calculation
+    // with the previous result now set as num1
+    if (display2 !== "0") {
+      display1 = display2;
+      num1 = Number(display1);
+      num2 = 0;
+      operator = selectedOperator;
+      display2 = "0";
+    }
+
+    if (num1 && operator) {
+      const symbols = ["/", "x", "-", "+"];
+
+      for (let i = 0; i < symbols.length; i++) {
+        const indexOfsymbol = display1.indexOf(symbols[i]);
+        if (indexOfsymbol !== -1) {
+          num2 = Number(display1.slice(indexOfsymbol + 1));
+        }
+      }
+      total = operate(operator, num1, num2);
+      display1 = total.toString();
+      num1 = total;
+      num2 = 0;
+      operator = selectedOperator;
+      updateDisplay();
+    }
+
+    if (["+", "-", "x", "/"].includes(lastChar)) {
+      display1 = display1.slice(0, -1) + button.textContent;
+    } else {
+      display1 = display1 + button.textContent;
+    }
+
+    num1 = Number(display1.slice(0, -1));
+    operator = selectedOperator;
+    updateDisplay();
+  });
+});
+
+//-------Functions-----------
+function clear() {
+  display1 = "0";
+  display2 = "0";
+  num1 = 0;
+  num2 = 0;
+  operator;
+  total = "";
+  updateDisplay();
+}
+
+function deleteBack() {
+  display1 = display1.toString().slice(0, -1);
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const display1Element = document.getElementById("display-1");
+  const display2Element = document.getElementById("display-2");
+
+  display1Element.textContent = display1;
+  display2Element.textContent = display2;
+}
+
+updateDisplay(); // Update the display initially
+
+function operate(operator, ...numbers) {
+  switch (operator) {
+    case "+":
+      return add(...numbers);
+    case "-":
+      return subtract(...numbers);
+    case "x":
+      return multiply(...numbers);
+    case "/":
+      return divide(...numbers);
+    default:
+      return "Invalid operator";
+  }
+}
+
+function add(...numbers) {
+  let total = 0;
+  for (num of numbers) {
+    total += num;
+  }
+  return total;
+}
+
+function subtract(...numbers) {
+  let total = numbers[0];
+  for (let i = 1; i < numbers.length; i++) {
+    total -= numbers[i];
+  }
+  return total;
+}
+
+function multiply(...numbers) {
+  let total = 1;
+  for (num of numbers) {
+    total *= num;
+  }
+  return total;
+}
+
+function divide(...numbers) {
+  let total = numbers[0];
+  for (let i = 1; i < numbers.length; i++) {
+    total /= numbers[i];
+  }
+  return total;
+}
+
+//implement the percent function

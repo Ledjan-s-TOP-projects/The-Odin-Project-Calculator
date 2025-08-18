@@ -6,22 +6,16 @@ let num2 = 0;
 let operator = "";
 let total = "";
 
+const operatorSymbols = ["+", "-", "*", "/"];
+const displayArray = Array(display1);
+
 //----Buttons' queries----
-const functions = document.querySelectorAll(".function");
+const actions = document.querySelectorAll(".action");
 const numbers = document.querySelectorAll(".number");
 const operators = document.querySelectorAll(".operator");
 
 //----Event Listeners for buttons----
-numbers.forEach((button) => {
-  button.addEventListener("click", () => {
-    display1 === "0"
-      ? (display1 = button.textContent)
-      : (display1 = display1.toString() + button.textContent);
-    updateDisplay();
-  });
-});
-
-functions.forEach((button) => {
+actions.forEach((button) => {
   button.addEventListener("click", () => {
     switch (button.id) {
       case "clear":
@@ -33,69 +27,59 @@ functions.forEach((button) => {
       case "equal":
         if (display1 === "0" || display1 === "") return;
         if (operator === "") return;
-        const symbols = ["/", "x", "-", "+"];
-        for (let i = 0; i < symbols.length; i++) {
-          const indexOfsymbol = display1.indexOf(symbols[i]);
-          if (indexOfsymbol !== -1) {
-            num2 = Number(display1.slice(indexOfsymbol + 1));
-            total = operate(operator, num1, num2);
-            display2 = total.toString();
-            updateDisplay();
-            return;
-          }
-        }
+        equal();
         break;
     }
   });
 });
 
+numbers.forEach((button) => {
+  button.addEventListener("click", () => {
+    //replacing the initial 0 on display1
+    display1 === "0"
+      ? (display1 = button.textContent)
+      : (display1 = display1.toString() + button.textContent);
+    updateDisplay();
+  });
+});
+
 operators.forEach((button) => {
   button.addEventListener("click", () => {
-    const operatorSymbols = {
-      divide: "/",
-      multiply: "x",
-      add: "+",
-      subtract: "-",
-    };
-    const selectedOperator = operatorSymbols[button.id];
-    const lastChar = display1.slice(-1);
-
-    if (display1 === "0") return;
-    //When a previous result is shown on Display2, the selected operator starts a new calculation
-    // with the previous result now set as num1
-    if (display2 !== "0") {
-      display1 = display2;
-      num1 = Number(display1);
-      num2 = 0;
-      operator = selectedOperator;
-      display2 = "0";
-    }
-
-    if (num1 && operator) {
-      const symbols = ["/", "x", "-", "+"];
-
-      for (let i = 0; i < symbols.length; i++) {
-        const indexOfsymbol = display1.indexOf(symbols[i]);
-        if (indexOfsymbol !== -1) {
-          num2 = Number(display1.slice(indexOfsymbol + 1));
-        }
+    //first calculation
+    if (total === "") {
+      if (num1 && operator && !display1.endsWith(operator)) {
+        equal();
+        display1 = total;
+        display2 = "0";
+        num1 = Number(total);
+        operator = button.value;
+        //Appends the operator to display1
+        const lastChar = display1.toString().slice(-1);
+        operatorSymbols.includes(lastChar)
+          ? (display1 = display1.slice(0, -1) + operator)
+          : (display1 = display1 + operator);
+      } else {
+        num1 = Number(display1);
+        operator = button.value;
+        //Appends the operator to display1
+        const lastChar = display1.slice(-1);
+        operatorSymbols.includes(lastChar)
+          ? (display1 = display1.slice(0, -1) + operator)
+          : (display1 = display1 + operator);
       }
-      total = operate(operator, num1, num2);
-      display1 = total.toString();
-      num1 = total;
-      num2 = 0;
-      operator = selectedOperator;
-      updateDisplay();
+    } else if (total !== "") {
+      //second calculation if you have a total already
+      display1 = total;
+      display2 = "0";
+      num1 = Number(total);
+      operator = button.value;
+      //Appends the operator to display1
+      const lastChar = display1.toString().slice(-1);
+      operatorSymbols.includes(lastChar)
+        ? (display1 = display1.slice(0, -1) + operator)
+        : (display1 = display1 + operator);
     }
 
-    if (["+", "-", "x", "/"].includes(lastChar)) {
-      display1 = display1.slice(0, -1) + button.textContent;
-    } else {
-      display1 = display1 + button.textContent;
-    }
-
-    num1 = Number(display1.slice(0, -1));
-    operator = selectedOperator;
     updateDisplay();
   });
 });
@@ -112,7 +96,13 @@ function clear() {
 }
 
 function deleteBack() {
-  display1 = display1.toString().slice(0, -1);
+  if (display1.toString() === "0") return;
+  //implement the fix to replace the last number remaining on display1, with 0
+  if (display1.length === 1) {
+    display1 = "0";
+  } else {
+    display1 = display1.toString().slice(0, -1);
+  }
   updateDisplay();
 }
 
@@ -132,7 +122,7 @@ function operate(operator, ...numbers) {
       return add(...numbers);
     case "-":
       return subtract(...numbers);
-    case "x":
+    case "*":
       return multiply(...numbers);
     case "/":
       return divide(...numbers);
@@ -171,6 +161,19 @@ function divide(...numbers) {
     total /= numbers[i];
   }
   return total;
+}
+
+function equal() {
+  for (let i = 0; i < operatorSymbols.length; i++) {
+    const indexOfsymbol = display1.indexOf(operatorSymbols[i]);
+    if (indexOfsymbol !== -1) {
+      num2 = Number(display1.slice(indexOfsymbol + 1));
+      total = operate(operator, num1, num2);
+      display2 = total.toString();
+      updateDisplay();
+      return;
+    }
+  }
 }
 
 //implement the percent function

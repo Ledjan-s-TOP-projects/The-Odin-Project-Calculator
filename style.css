@@ -33,8 +33,9 @@ body {
   margin: 20px;
   text-align: right;
   border-radius: 12px;
-  background-color: #eaeaea83; /* subtle light gray for screen */
-  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.2); /* sunken effect */
+  /* border-bottom: solid gray 1px; */
+  /* background-color: #eaeaea83; subtle light gray for screen */
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.2);
   font-size: 2rem;
   color: #333333a8;
   display: flex;
@@ -61,7 +62,7 @@ body {
 
 .number,
 .operator,
-.function {
+.action {
   width: 67.28px;
   height: 65.85px;
   border-radius: 13px;
@@ -80,7 +81,7 @@ body {
 
 .number:hover,
 .operator:hover,
-.function:hover {
+.action:hover {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }

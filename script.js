@@ -7,18 +7,25 @@ let operator = "";
 let total = "";
 
 //---------Utility variables-------------
+let error = false;
+const maxDisplay = 15;
+
+// Used for checking/replacing operators in display strings
 const operatorSymbols = ["+", "-", "*", "/"];
-const displayArray = Array(display1);
-const lastChar = display1.slice(-1);
 
 //----Buttons' queries----
 const actions = document.querySelectorAll(".action");
 const numbers = document.querySelectorAll(".number");
 const operators = document.querySelectorAll(".operator");
-const maxDisplay = 9;
+const decimal = document.querySelector(".decimal");
+
 //----Event Listeners for buttons----
 actions.forEach((button) => {
   button.addEventListener("click", () => {
+    if (error) {
+      clear();
+      error = false;
+    }
     switch (button.id) {
       case "clear":
         clear();
@@ -37,6 +44,10 @@ actions.forEach((button) => {
 
 numbers.forEach((button) => {
   button.addEventListener("click", () => {
+    if (error) {
+      clear();
+      error = false;
+    }
     if (display1.length < maxDisplay) {
       //replacing the initial 0 on display1
       display1 === "0"
@@ -47,42 +58,64 @@ numbers.forEach((button) => {
   });
 });
 
+decimal.addEventListener("click", (e) => {
+  const button = e.target;
+  if (error) {
+    clear();
+    error = false;
+  }
+
+  // Find last operator to isolate current number
+  const lastOperatorIndex = Math.max(
+    display1.lastIndexOf("+"),
+    display1.lastIndexOf("-"),
+    display1.lastIndexOf("*"),
+    display1.lastIndexOf("/")
+  );
+
+  const currentNumber = display1.slice(lastOperatorIndex + 1);
+
+  // Append decimal only if current number doesn't already have one
+  if (!currentNumber.includes(".")) {
+    display1 += button.value;
+    updateDisplay();
+  }
+});
+
 operators.forEach((button) => {
   button.addEventListener("click", () => {
+    if (error) {
+      clear();
+      error = false;
+    }
     if (total === "") {
       //Chain of calculations
       if (num1 && operator && !display1.endsWith(operator)) {
         equal();
 
-        display1 = total;
+        display1 = total.toString();
         num1 = total;
         num2 = 0;
         operator = button.value;
         total = "";
-        operatorSymbols.includes(lastChar)
-          ? (display1 = display1.slice(0, -1) + operator)
-          : (display1 = display1 + operator);
+        //Appends the operator to display1
+        appendOperator();
       } else {
         //First calculation
         num1 = Number(display1);
         operator = button.value;
-
-        operatorSymbols.includes(lastChar)
-          ? (display1 = display1.slice(0, -1) + operator)
-          : (display1 = display1 + operator);
+        //Appends the operator to display1
+        appendOperator();
       }
     } else if (total !== "") {
       //next calculation after pressing =
-      display1 = total;
+      display1 = total.toString();
       display2 = "0";
       num1 = Number(total);
       operator = button.value;
       //Appends the operator to display1
-      operatorSymbols.includes(lastChar)
-        ? (display1 = display1.slice(0, -1) + operator)
-        : (display1 = display1 + operator);
+      appendOperator();
     }
-
     updateDisplay();
   });
 });
@@ -93,7 +126,7 @@ function clear() {
   display2 = "0";
   num1 = 0;
   num2 = 0;
-  operator;
+  operator = "";
   total = "";
   updateDisplay();
 }
@@ -136,7 +169,7 @@ function operate(operator, ...numbers) {
 
 function add(...numbers) {
   let total = 0;
-  for (num of numbers) {
+  for (let num of numbers) {
     total += num;
   }
   return total;
@@ -152,7 +185,7 @@ function subtract(...numbers) {
 
 function multiply(...numbers) {
   let total = 1;
-  for (num of numbers) {
+  for (let num of numbers) {
     total *= num;
   }
   return total;
@@ -167,11 +200,19 @@ function divide(...numbers) {
 }
 
 function equal() {
+  // Loop through possible operators and extract num2
   for (let i = 0; i < operatorSymbols.length; i++) {
+    //find the index of the operator
     const indexOfsymbol = display1.indexOf(operatorSymbols[i]);
     if (indexOfsymbol !== -1) {
       num2 = Number(display1.slice(indexOfsymbol + 1));
-      total = operate(operator, num1, num2);
+      if (num2 === 0 && operatorSymbols[i] === "/") {
+        display2 = "Can't / by 0!";
+        error = true;
+        return;
+      } else {
+        total = Math.round(operate(operator, num1, num2) * 100000) / 100000;
+      }
       display2 = total.toString();
       updateDisplay();
       return;
@@ -179,4 +220,12 @@ function equal() {
   }
 }
 
-//implement the percent function
+// Utility: returns the last character of display1
+const lastChar = () => display1.slice(-1);
+
+//Utility: appends the operator to display1
+const appendOperator = () => {
+  operatorSymbols.includes(lastChar())
+    ? (display1 = display1.slice(0, -1) + operator)
+    : (display1 = display1 + operator);
+};

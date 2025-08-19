@@ -58,7 +58,8 @@ body {
 
 .number,
 .operator,
-.action {
+.action,
+.decimal {
   width: 67.28px;
   height: 65.85px;
   border-radius: 13px;
@@ -98,5 +99,9 @@ body {
 }
 
 #equal {
+  flex-grow: 1;
+}
+
+#clear {
   flex-grow: 1;
 }

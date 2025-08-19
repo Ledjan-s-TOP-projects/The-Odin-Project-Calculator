@@ -19,47 +19,127 @@ const numbers = document.querySelectorAll(".number");
 const operators = document.querySelectorAll(".operator");
 const decimal = document.querySelector(".decimal");
 
-//----Event Listeners for buttons----
+//================== Event Listeners ==================
+//--------Event Listener for Actions----------------------------
 actions.forEach((button) => {
-  button.addEventListener("click", () => {
-    if (error) {
-      clear();
-      error = false;
-    }
-    switch (button.id) {
-      case "clear":
-        clear();
-        break;
-      case "delete":
-        deleteBack();
-        break;
-      case "equal":
-        if (display1 === "0" || display1 === "") return;
-        if (operator === "") return;
-        equal();
-        break;
-    }
-  });
+  button.addEventListener("click", () => handleActionsInput(button));
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Delete") {
+    handleActionsInput("clear");
+  } else if (e.key === "Backspace") {
+    handleActionsInput("delete");
+  } else if (e.key === "Enter") {
+    handleActionsInput("equal");
+  }
 });
 
+//------Event Listeners for Numbers---------------------------
 numbers.forEach((button) => {
-  button.addEventListener("click", () => {
-    if (error) {
-      clear();
-      error = false;
-    }
-    if (display1.length < maxDisplay) {
-      //replacing the initial 0 on display1
-      display1 === "0"
-        ? (display1 = button.textContent)
-        : (display1 = display1.toString() + button.textContent);
-      updateDisplay();
-    }
-  });
+  button.addEventListener("click", () => handleNumberInput(button));
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key >= "0" && e.key <= "9") {
+    handleNumberInput(e.key);
+  }
 });
 
-decimal.addEventListener("click", (e) => {
-  const button = e.target;
+//------Event Listeners for Decimal---------------------------
+decimal.addEventListener("click", (e) => handleDecimalInput(e.target.value));
+document.addEventListener("keydown", (e) => {
+  if (e.key === ".") {
+    handleDecimalInput(e.key);
+  }
+});
+
+//------Event Listeners for Operators----------------------
+operators.forEach((button) => {
+  button.addEventListener("click", () => operatorInputHandler(button));
+});
+document.addEventListener("keydown", (e) => {
+  if (operatorSymbols.includes(e.key)) {
+    operatorInputHandler(e.key);
+  }
+});
+
+//-----Handeling functions--------------------------
+const handleActionsInput = (input) => {
+  const action = typeof input === "string" ? input : input.id;
+  if (error) {
+    clear();
+    error = false;
+  }
+  switch (action) {
+    case "clear":
+      clear();
+      break;
+    case "delete":
+      deleteBack();
+      break;
+    case "equal":
+      if (display1 === "0" || display1 === "") return;
+      if (operator === "") return;
+      equal();
+      break;
+  }
+};
+
+const handleNumberInput = (input) => {
+  //Check the typeof input and assign it to value
+  const value = typeof input === "string" ? input : input.value;
+  if (error) {
+    clear();
+    error = false;
+  }
+  if (display1.length < maxDisplay) {
+    //replacing the initial 0 on display1
+    display1 === "0"
+      ? (display1 = value)
+      : (display1 = display1.toString() + value);
+    updateDisplay();
+  }
+};
+
+// operator input handler
+const operatorInputHandler = (input) => {
+  const value = typeof input === "string" ? input : input.value;
+
+  if (error) {
+    clear();
+    error = false;
+  }
+  if (total === "") {
+    //Chain of calculations
+    if (num1 && operator && !display1.endsWith(operator)) {
+      equal();
+
+      display1 = total.toString();
+      num1 = total;
+      num2 = 0;
+      operator = value;
+      total = "";
+      //Appends the operator to display1
+      appendOperator();
+    } else {
+      //First calculation
+      num1 = Number(display1);
+      operator = value;
+      //Appends the operator to display1
+      appendOperator();
+    }
+  } else if (total !== "") {
+    //next calculation after pressing =
+    display1 = total.toString();
+    display2 = "0";
+    num1 = Number(total);
+    operator = value;
+    //Appends the operator to display1
+    appendOperator();
+  }
+  updateDisplay();
+};
+
+const handleDecimalInput = (value) => {
   if (error) {
     clear();
     error = false;
@@ -75,50 +155,13 @@ decimal.addEventListener("click", (e) => {
 
   const currentNumber = display1.slice(lastOperatorIndex + 1);
 
-  // Append decimal only if current number doesn't already have one
+  // If the current number does not contain a decimal point, append the decimal
+  // to the current number and update display1
   if (!currentNumber.includes(".")) {
-    display1 += button.value;
+    display1 += value;
     updateDisplay();
   }
-});
-
-operators.forEach((button) => {
-  button.addEventListener("click", () => {
-    if (error) {
-      clear();
-      error = false;
-    }
-    if (total === "") {
-      //Chain of calculations
-      if (num1 && operator && !display1.endsWith(operator)) {
-        equal();
-
-        display1 = total.toString();
-        num1 = total;
-        num2 = 0;
-        operator = button.value;
-        total = "";
-        //Appends the operator to display1
-        appendOperator();
-      } else {
-        //First calculation
-        num1 = Number(display1);
-        operator = button.value;
-        //Appends the operator to display1
-        appendOperator();
-      }
-    } else if (total !== "") {
-      //next calculation after pressing =
-      display1 = total.toString();
-      display2 = "0";
-      num1 = Number(total);
-      operator = button.value;
-      //Appends the operator to display1
-      appendOperator();
-    }
-    updateDisplay();
-  });
-});
+};
 
 //-------Functions-----------
 function clear() {

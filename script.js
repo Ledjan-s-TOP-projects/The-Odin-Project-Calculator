@@ -6,14 +6,16 @@ let num2 = 0;
 let operator = "";
 let total = "";
 
+//---------Utility variables-------------
 const operatorSymbols = ["+", "-", "*", "/"];
 const displayArray = Array(display1);
+const lastChar = display1.slice(-1);
 
 //----Buttons' queries----
 const actions = document.querySelectorAll(".action");
 const numbers = document.querySelectorAll(".number");
 const operators = document.querySelectorAll(".operator");
-
+const maxDisplay = 9;
 //----Event Listeners for buttons----
 actions.forEach((button) => {
   button.addEventListener("click", () => {
@@ -35,46 +37,47 @@ actions.forEach((button) => {
 
 numbers.forEach((button) => {
   button.addEventListener("click", () => {
-    //replacing the initial 0 on display1
-    display1 === "0"
-      ? (display1 = button.textContent)
-      : (display1 = display1.toString() + button.textContent);
-    updateDisplay();
+    if (display1.length < maxDisplay) {
+      //replacing the initial 0 on display1
+      display1 === "0"
+        ? (display1 = button.textContent)
+        : (display1 = display1.toString() + button.textContent);
+      updateDisplay();
+    }
   });
 });
 
 operators.forEach((button) => {
   button.addEventListener("click", () => {
-    //first calculation
     if (total === "") {
+      //Chain of calculations
       if (num1 && operator && !display1.endsWith(operator)) {
         equal();
+
         display1 = total;
-        display2 = "0";
-        num1 = Number(total);
+        num1 = total;
+        num2 = 0;
         operator = button.value;
-        //Appends the operator to display1
-        const lastChar = display1.toString().slice(-1);
+        total = "";
         operatorSymbols.includes(lastChar)
           ? (display1 = display1.slice(0, -1) + operator)
           : (display1 = display1 + operator);
       } else {
+        //First calculation
         num1 = Number(display1);
         operator = button.value;
-        //Appends the operator to display1
-        const lastChar = display1.slice(-1);
+
         operatorSymbols.includes(lastChar)
           ? (display1 = display1.slice(0, -1) + operator)
           : (display1 = display1 + operator);
       }
     } else if (total !== "") {
-      //second calculation if you have a total already
+      //next calculation after pressing =
       display1 = total;
       display2 = "0";
       num1 = Number(total);
       operator = button.value;
       //Appends the operator to display1
-      const lastChar = display1.toString().slice(-1);
       operatorSymbols.includes(lastChar)
         ? (display1 = display1.slice(0, -1) + operator)
         : (display1 = display1 + operator);
@@ -170,7 +173,6 @@ function equal() {
       num2 = Number(display1.slice(indexOfsymbol + 1));
       total = operate(operator, num1, num2);
       display2 = total.toString();
-      //fix how you handle total on display2 for the other processes
       updateDisplay();
       return;
     }
